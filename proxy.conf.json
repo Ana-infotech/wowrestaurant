@@ -1,0 +1,13 @@
+{
+    "/api/*": {
+        "target": "http://localhost:4200",
+        "secure": false
+    },
+    "/api-rewrite/*": {
+        "target": "https://restaurantappapi.azurewebsites.net",
+        "secure": false,
+        "pathRewrite": {
+            "^/api-rewrite": ""
+        }
+    }
+}

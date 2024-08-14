@@ -110,14 +110,25 @@
   }
   
   /* Main content styles */
+  main {
+    margin-left: 250px;
+    padding: 60px 20px;
+    transition: margin-left 0.3s;
+    background-color: lightgrey;
+  }
+  
+  .sidebar.close ~ main {
+    margin-left: 250px;
+  }
+
   .main {
     margin-left: 250px;
     padding: 20px;
     transition: margin-left 0.3s;
-    width: calc(100% - 250px);
+    width: calc(100% - 80px);
   }
   
-  .sidebar.close ~ .main {
+  .main.sidebar-closed {
     margin-left: 80px;
     width: calc(100% - 80px);
   }

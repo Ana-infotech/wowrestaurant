@@ -1,0 +1,45 @@
+<aside class="sidebar" [ngClass]="{'close': isSidebarClosed}">
+    <div class="logo"><i class="fas fa-utensils"></i> Wow Restaurant</div>
+    <div class="menu-content">
+      <ul class="menu-items">
+        <li class="item">
+            <a routerLink="#">Sales</a>
+        </li>
+  
+        <li class="item">
+          <a routerLink="#">Purchase</a>
+        </li>
+  
+        <li class="item" *ngFor="let menuItem of menuItems; let i = index">
+          <div class="submenu-item" 
+               (click)="toggleSubmenu(i)" 
+               role="button" 
+               [attr.aria-expanded]="activeSubmenuIndex === i ? 'true' : 'false'">
+            <span>{{ menuItem.title }}</span>
+            <i class="fa-solid fa-chevron-right"></i>
+          </div>
+          <ul class="menu-items submenu" [ngClass]="{'submenu-active': activeSubmenuIndex === i}">
+            <div class="menu-title" (click)="closeSubmenu()" role="button">
+              <i class="fa-solid fa-chevron-left"></i>
+              Report Upload
+            </div>
+            <li class="item" *ngFor="let subItem of menuItem.subItems">
+              <a (click)="navigateMenu(subItem.path)">{{ subItem.name }}</a>
+            </li>
+          </ul>
+        </li>
+  
+        <li class="item">
+          <a routerLink="#">Your second link</a>
+        </li>
+  
+        <li class="item">
+          <a routerLink="#">Your third link</a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <nav class="navbar">
+    <i class="fa-solid fa-bars" id="sidebar-toggle" (click)="toggleSidebar()" role="button" aria-label="Toggle Sidebar"></i>
+  </nav>
