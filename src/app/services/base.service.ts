@@ -40,11 +40,11 @@ export class BaseService {
   }
 
   // Common POST method
-  protected post(url: string, body: any, options: { headers?: HttpHeaders; params?: HttpParams } = {}) {
+  protected post(url: string, body: any, options: { headers?: HttpHeaders } = {}) {
     options = {
       ...(options || {}),
       headers: this.getHeaders(options.headers)
-    };
+    };    
     return this.http.post(`${this.baseUrl}/${url}`, body, options);
   }
 

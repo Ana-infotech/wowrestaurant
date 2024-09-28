@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import * as Papa from 'papaparse';
 
 import { ReportService } from '../report.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpEventType  } from '@angular/common/http';
 
 @Component({
   selector: 'app-order-history',
@@ -20,8 +20,9 @@ export class OrderHistoryComponent implements OnInit {
   file: File | null = null;
   fileName: string | null = null;
   uploadedFileData: any;
+  selectedFile: any;
 
-  constructor(private reportService: ReportService) {}
+  constructor(private reportService: ReportService, private http: HttpClient) {}
 
   ngOnInit() {
     this.reportService.getSalePayment('Sales/GetSalesPayment').subscribe((resData: any) => {
@@ -31,6 +32,7 @@ export class OrderHistoryComponent implements OnInit {
 
   onFileChange(event: any) {
     const selectedFile = event.target.files[0];
+    this.selectedFile = event.target.files[0];
     if (selectedFile) {
       this.file = selectedFile;
       this.fileName = selectedFile.name;
@@ -38,37 +40,69 @@ export class OrderHistoryComponent implements OnInit {
   }
 
   onSubmit(event: Event) {
-    event.preventDefault();  // Prevent the default form submission behavior
+    event.preventDefault();
+    const formData = new FormData();
+    if (this.selectedFile) {
+    formData.append('file', this.selectedFile, this.selectedFile.name);
 
-    if (!this.file) {
-      return;
-    }
-
-    const fileReader = new FileReader();
-    fileReader.onload = (e: any) => {
-      const fileContent = e.target.result;
-
-      if (this.file.type === 'text/csv') {
-        this.processCSV(fileContent);
-      } else if (this.file.type.includes('spreadsheetml.sheet') || this.file.name.endsWith('.xls')) {
-        this.processExcel(fileContent);
-      }
-    };
-
-    if (this.file) {
-      if (this.file.type === 'text/csv') {
-        fileReader.readAsText(this.file);
-      } else {
-        fileReader.readAsBinaryString(this.file);
-      }
-    }
-    setTimeout(() => {
-      this.reportService.uploadSalesFile("Sales/UploadSalesOrder", {params: this.uploadedFileData}).subscribe((res) => {
-        console.log(res, "res");
+    //this.http.post('https://restaurantappapi.azurewebsites.net/api/Sales/UploadSalesOrder/upload', formData, {
+      this.http.post('https://localhost:7199/api/Sales/UploadSalesOrder/upload', formData, {
+        reportProgress: true,
+        observe: 'events'
+      }).subscribe(event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          console.log('Upload progress:', Math.round((100 * event.loaded) / event.total) + '%');
+        } else if (event.type === HttpEventType.Response) {
+          console.log('Upload success', event.body);
+        }
+      }, error => {
+        console.error('Upload error:', error);
       });
-    }, 1000);
-    
+    } else {
+      console.error('No file selected.');
+    }
   }
+
+
+  // onSubmit(event: Event) {
+  //   event.preventDefault();  // Prevent the default form submission behavior
+
+  //   if (!this.file) {
+  //     return;
+  //   }
+
+  //   const fileReader = new FileReader();
+  //   fileReader.onload = (e: any) => {
+  //     const fileContent = e.target.result;
+
+  //     if (this.file.type === 'text/csv') {
+  //       this.processCSV(fileContent);
+  //     } else if (this.file.type.includes('spreadsheetml.sheet') || this.file.name.endsWith('.xls')) {
+  //       this.processExcel(fileContent);
+  //     }
+  //   };
+
+  //   if (this.file) {
+  //     if (this.file.type === 'text/csv') {
+  //       fileReader.readAsText(this.file);
+  //     } else {
+  //       fileReader.readAsBinaryString(this.file);
+  //     }
+  //   }
+
+  //   const formData = new FormData();
+  //   formData.append(this.selectedFile, this.selectedFile.name);
+  //   console.log(formData, this.selectedFile);
+  //   setTimeout(() => {
+  //     this.reportService.uploadSalesFile("Sales/UploadSalesOrder/upload", formData,  {
+  //       reportProgress: true,
+  //       observe: 'events'
+  //     }).subscribe((res) => {
+  //       console.log(res, "res");
+  //     });
+  //   }, 1000);
+    
+  // }
 
   processCSV(csvData: string) {
     Papa.parse(csvData, {
